@@ -1,0 +1,36 @@
+version: '1.0'
+
+services:
+  postgres:
+    image: postgres:latest
+    container_name: ms-postgres-db
+    restart: unless-stopped
+    environment:
+      POSTGRES_USER: myuser
+      POSTGRES_PASSWORD: mypassword
+      POSTGRES_DB: mydatabase
+    ports:
+      - "5432:5432"
+    volumes:
+      - postgres:/var/lib/postgresql/data
+    networks:
+      - samarin-net
+
+  mongodb:
+    container_name: ms-mongo-db
+    image: mongo:latest
+    ports:
+      - 27017:27017
+    volumes:
+      -  mongo:/data
+    environment:
+      - MONGO_INITDB_ROOT_USERNAME=soares
+      - MONGO_INITDB_ROOT_PASSWORD=soares
+
+networks:
+  samarin-net:
+    driver: bridge
+
+volumes:
+  postgres:
+  mongo:
