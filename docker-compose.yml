@@ -1,0 +1,51 @@
+version: "1.0"
+
+services:
+  postgres:
+    image: postgres:latest
+    container_name: ms-postgres-db
+    restart: unless-stopped
+    environment:
+      POSTGRES_USER: samarin-admin
+      POSTGRES_PASSWORD: JHGASDRAA
+      POSTGRES_DB: samarin-users
+    ports:
+      - "5432:5432"
+    volumes:
+      - postgres:/var/lib/postgresql/data
+    networks:
+      - samarin-net
+
+  pg_admin:
+    container_name: pg_admin
+    image: dpage/pgadmin4
+    environment:
+      PGADMIN_DEFAULT_EMAIL: ${PGADMIN_DEFAULT_EMAIL:-pgadmin@pgadmin.org}
+      PGADMIN_DEFAULT_PASSWORD: ${PGADMIN_DEFAULT_PASSWORD:-admin}
+      PGADMIN_CONFIG_SERVER_MODE: 'False'
+    depends_on:
+      - postgres
+    ports:
+      - 5050:80
+    networks:
+      - samarin-net
+    restart: unless-stopped
+
+  mongodb:
+    container_name: ms-mongo-db
+    image: mongo:latest
+    ports:
+      - 27017:27017
+    volumes:
+      - mongo:/data
+    environment:
+      - MONGO_INITDB_ROOT_USERNAME=soares
+      - MONGO_INITDB_ROOT_PASSWORD=soares
+
+networks:
+  samarin-net:
+    driver: bridge
+
+volumes:
+  postgres:
+  mongo:
