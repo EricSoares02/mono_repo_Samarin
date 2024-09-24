@@ -1,0 +1,113 @@
+version: "1.0"
+
+services:
+# Postgres Service
+  postgres:
+    image: postgres:latest
+    container_name: ms-postgres-db
+    restart: unless-stopped
+    environment:
+      POSTGRES_USER: developertest
+      POSTGRES_PASSWORD: testpass
+      POSTGRES_DB: samarin
+    ports:
+      - "5432:5432"
+    volumes:
+      - postgres:/var/lib/postgresql/data
+    networks:
+      - samarin-net
+
+# PG admin ui Service to maneger postgres databases
+  pgadmin:
+    image: dpage/pgadmin4
+    container_name: ms-pgadmin4
+    restart: unless-stopped
+    environment:
+      PGADMIN_DEFAULT_EMAIL: developertest@example.com
+      PGADMIN_DEFAULT_PASSWORD: testpass
+    ports:
+      - "5050:80"
+    depends_on:
+      - postgres
+    networks:
+      - samarin-net
+
+ # MongoDB service
+  mongodb:
+    container_name: ms-mongo-db
+    image: mongo:latest
+    restart: unless-stopped
+    ports:
+      - 27017:27017
+    volumes:
+      - mongo:/data
+    environment:
+      - MONGO_INITDB_ROOT_USERNAME=developertest
+      - MONGO_INITDB_ROOT_PASSWORD=testpass
+
+# MongoExpress service
+  mongo-express:
+    image: mongo-express:latest
+    container_name: mongo-express
+    restart: unless-stopped
+    environment:
+      ME_CONFIG_MONGODB_ADMINUSERNAME: developertest
+      ME_CONFIG_MONGODB_ADMINPASSWORD: testpass
+      ME_CONFIG_MONGODB_SERVER: mongo
+    ports:
+      - "8081:8081"
+    depends_on:
+      - mongo
+    networks:
+      - samarin-net
+
+# Redis service
+  redis:
+    image: redis:alpine 
+    container_name: ms-redis-db
+    restart: unless-stopped
+    ports:
+      - "6379:6379" 
+    volumes:
+      - ./redis.conf:/usr/local/etc/redis/redis.conf 
+    environment:
+      - REDIS_PASSWORD=testpass 
+    command: ["redis-server", "--requirepass", "yourpassword"]
+
+# RabbitMq service, broker service
+  rabbitmq:
+    image: rabbitmq:3-management
+    container_name: rabbitmq
+    ports:
+      - "5672:5672"
+      - "15672:15672"
+    volumes:
+      - ~/.docker-conf/rabbitmq/data/:/var/lib/rabbitmq/
+      - ~/.docker-conf/rabbitmq/log/:/var/log/rabbitmq
+    networks:
+      - samarin-net
+
+  user-service:
+    container_name: user-service
+    build:
+      context: .
+      dockerfile: Dockerfile
+    ports:
+      - "3090:3090"
+    volumes:
+      - .:/user-service/
+      - /user-service/node_modules
+    depends_on:
+      - postgres
+      - rabbitmq
+    networks:
+      - samarin-net
+
+networks:
+  samarin-net:
+    driver: bridge
+
+volumes:
+  postgres:
+  mongo:
+  redis:
