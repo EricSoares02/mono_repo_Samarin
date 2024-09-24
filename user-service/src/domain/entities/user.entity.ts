@@ -82,7 +82,7 @@ export class User{
       return this.surname
     }
     get GetBirth_date(){
-      return this.birth_date
+      return this.birth_date.GetbirthDate
     }
     get GetUser_tag(){
       return this.user_tag
@@ -127,6 +127,6 @@ export class User{
       return this.updatedAt
     }
     get GetAddress(){
-      return this.address
+      return this.address.getAddress()
     }
   }
